@@ -1,0 +1,12 @@
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__
+
+venv/
+env/
+.venv/
+
+.env
+src/static/uploads/documents/*
+src/static/uploads/images/*
