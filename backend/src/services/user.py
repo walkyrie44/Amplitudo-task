@@ -42,3 +42,19 @@ def create_user_token(user: User):
 def get_all_users(db: Session):
     users = db.query(User).filter(User.role_id == 2).all()
     return [UserOut.from_orm(user) for user in users]
+
+
+def get_or_create_google_user(db: Session, email: str, full_name: str):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user_data = {
+            "email": email,
+            "password": None,
+            "role_id": 2,
+            "full_name": full_name,
+        }
+        user = User(**user_data)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    return user

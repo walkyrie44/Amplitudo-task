@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { login, googleLogin } from "../services/auth";
 import { AuthContext } from "../components/AuthContext";
 import logo from "../assets/images/logo.png";
@@ -10,7 +10,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   const { updateAuth } = useContext(AuthContext);
 
@@ -19,27 +18,26 @@ export default function Login() {
     setError(null);
 
     try {
-      const response = await login(email, password);
+      await login(email, password);
       updateAuth();
     } catch (err) {
       setError(err);
     }
   };
 
-//   const handleGoogleLogin = async (response) => {
-//     setError(null);
-
-//     try {
-//       const googleResponse = await googleLogin(response.credential);
-//       setToken(googleResponse.access_token);
-//       navigate("/");
-//     } catch (err) {
-//       setError(err);
-//     }
-//   };
+  const handleGoogleLogin = async (response) => {
+    setError(null);
+    try {
+      await googleLogin(response.credential);
+      updateAuth();
+    } catch (err) {
+      setError(err);
+    }
+  };
+  
 
   return (
-    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+    <GoogleOAuthProvider clientId="486402589132-s1pkpi6jaobl36nfeu55mcv3f468v1q8.apps.googleusercontent.com">
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
@@ -126,12 +124,12 @@ export default function Login() {
 
           {/* Google login button */}
           <div className="mt-6">
-            {/* <GoogleLogin
+            <GoogleLogin
               onSuccess={handleGoogleLogin}
               onError={() => setError("Google login failed")}
               useOneTap
               className="w-full bg-white text-black font-semibold py-2 px-4 rounded-md border border-gray-300 hover:bg-gray-100"
-            /> */}
+            />
           </div>
         </div>
       </div>

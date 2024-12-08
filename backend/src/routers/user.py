@@ -2,10 +2,47 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from services.security import admin_required
 from database.session import get_db
-from schemas.user import UserCreate, UserOut, Token, LoginRequest
-from services.user import create_user, login_user, get_all_users
+from schemas.user import UserCreate, UserOut, Token, LoginRequest, GoogleLoginRequest
+from services.user import (
+    create_user,
+    login_user,
+    get_all_users,
+    get_or_create_google_user,
+    create_user_token,
+)
+from google.oauth2 import id_token
+from google.auth.transport import requests
+import os
 
 user_router = APIRouter()
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+
+@user_router.post("/google-login", response_model=Token)
+def google_login(
+    google_login_request: GoogleLoginRequest, db: Session = Depends(get_db)
+):
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            google_login_request.token, requests.Request(), GOOGLE_CLIENT_ID
+        )
+
+        email = idinfo.get("email")
+        full_name = idinfo.get("name")
+
+        if not email:
+            raise HTTPException(
+                status_code=400, detail="Google login failed: email not provided"
+            )
+
+        user = get_or_create_google_user(db, email=email, full_name=full_name)
+
+        token = create_user_token(user)
+        return token
+
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
 
 
 @user_router.post("/register", response_model=UserOut)

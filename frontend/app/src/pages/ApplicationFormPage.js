@@ -236,7 +236,7 @@ export default function ApplicationForm() {
                   id="birth_date"
                   name="birth_date"
                   type="date"
-                  value={formData?.birth_date || ""} // Puni polje sa podacima
+                  value={formData?.birth_date || ""}
                   onChange={handleInputChange}
                   className="mt-2 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 px-4 py-3 text-sm"
                 />
@@ -310,7 +310,7 @@ export default function ApplicationForm() {
                   onChange={handleInputChange}
                   className="mt-2 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 px-4 py-3 text-sm"
                 >
-                  <option defaul>Select gender</option>
+                  <option value="" disabled>Select gender</option>
                   <option>male</option>
                   <option>female</option>
                   <option>other</option>

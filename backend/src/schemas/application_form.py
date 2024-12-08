@@ -19,7 +19,6 @@ class JobApplicantCreate(BaseModel):
     education: str
     cv_files: Optional[List[str]] = []
     profile_picture: Optional[str] = None
-    # user_id: int
 
     class Config:
         orm_mode = True
