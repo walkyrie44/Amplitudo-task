@@ -8,8 +8,13 @@ PATH = "static/uploads"
 
 
 def save_image(image_base64: str) -> str:
+    if not image_base64:
+        return None
     save_directory = PATH + "/images"
     os.makedirs(save_directory, exist_ok=True)
+
+    if os.path.exists(image_base64):
+        return image_base64
 
     image_data = base64.b64decode(image_base64)
 
@@ -36,6 +41,8 @@ def save_image(image_base64: str) -> str:
 
 
 def save_documents(document_files: list[str]) -> list[str]:
+    if not document_files:
+        return None
     save_directory = PATH + "/documents"
     os.makedirs(save_directory, exist_ok=True)
 
@@ -44,7 +51,6 @@ def save_documents(document_files: list[str]) -> list[str]:
     for document_base64 in document_files:
         try:
             document_data = base64.b64decode(document_base64)
-
             filename = f"{uuid.uuid4()}.pdf"
             file_path = os.path.join(save_directory, filename)
 

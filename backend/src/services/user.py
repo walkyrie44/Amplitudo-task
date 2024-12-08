@@ -16,6 +16,7 @@ def create_user(db: Session, user_create: UserCreate):
 
     if user_create.full_name:
         user_data["full_name"] = user_create.full_name
+
     if user_create.photo:
         user_data["photo"] = save_image(user_create.photo)
 
@@ -29,12 +30,12 @@ def create_user(db: Session, user_create: UserCreate):
 def login_user(db: Session, email: str, password: str):
     user = db.query(User).filter(User.email == email).first()
     if user and bcrypt.verify(password, user.password):
-        return user
+        return create_user_token(user)
     return None
 
 
 def create_user_token(user: User):
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email, "role": user.role_id})
     return Token(access_token=access_token, token_type="bearer")
 
 

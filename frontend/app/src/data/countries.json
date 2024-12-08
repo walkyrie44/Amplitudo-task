@@ -1,0 +1,50 @@
+{
+    "countries": [
+      {
+        "name": "Montenegro",
+        "schools": [
+          { "name": "Gymnasium Slobodan Skerovic", "city": "Podgorica" },
+          { "name": "Secondary School of Economics", "city": "Podgorica" },
+          { "name": "Electrotechnical School Vaso Aligrudić", "city": "Podgorica" },
+          { "name": "High School Danilo Kiš", "city": "Budva" },
+          { "name": "Secondary School of Tourism", "city": "Kotor" },
+          { "name": "Gymnasium Tivat", "city": "Tivat" },
+          { "name": "Secondary Maritime School", "city": "Bar" },
+          { "name": "Gymnasium Niko Rolović", "city": "Bar" },
+          { "name": "High School Herceg Novi", "city": "Herceg Novi" },
+          { "name": "Gymnasium Cetinje", "city": "Cetinje" }
+        ]
+      },
+      {
+        "name": "Serbia",
+        "schools": [
+          { "name": "Gymnasium Jovan Jovanović Zmaj", "city": "Novi Sad" },
+          { "name": "Mathematical Gymnasium", "city": "Belgrade" },
+          { "name": "Gymnasium Svetozar Marković", "city": "Niš" },
+          { "name": "Karlovci Gymnasium", "city": "Sremski Karlovci" },
+          { "name": "Gymnasium Bora Stanković", "city": "Vranje" },
+          { "name": "Technical School Ivan Sarić", "city": "Subotica" },
+          { "name": "Gymnasium Stevan Jakovljević", "city": "Kragujevac" },
+          { "name": "Gymnasium Svetozar Miletić", "city": "Zrenjanin" },
+          { "name": "Technical School Uzice", "city": "Uzice" },
+          { "name": "Gymnasium Valjevo", "city": "Valjevo" }
+        ]
+      },
+      {
+        "name": "Croatia",
+        "schools": [
+          { "name": "XV Gymnasium", "city": "Zagreb" },
+          { "name": "School of Applied Arts", "city": "Zagreb" },
+          { "name": "Gymnasium Andrije Mohorovičića", "city": "Rijeka" },
+          { "name": "Gymnasium Jure Kaštelan", "city": "Split" },
+          { "name": "Mathematical Gymnasium", "city": "Split" },
+          { "name": "Gymnasium Ruđer Bošković", "city": "Osijek" },
+          { "name": "Technical School Varaždin", "city": "Varaždin" },
+          { "name": "Gymnasium Fran Galović", "city": "Koprivnica" },
+          { "name": "School of Chemistry and Technology", "city": "Zagreb" },
+          { "name": "Gymnasium Dubrovnik", "city": "Dubrovnik" }
+        ]
+      }
+    ]
+  }
+  

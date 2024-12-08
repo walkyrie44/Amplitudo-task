@@ -14,11 +14,10 @@ def create_access_token(
 ) -> str:
     to_encode = data.copy()
 
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(hours=1)
+    if expires_delta is None:
+        expires_delta = timedelta(minutes=30)
 
+    expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -47,7 +46,8 @@ def get_current_user(
             )
 
         user_id: int = payload.get("sub")
-        if user_id is None:
+        role: str = payload.get("role")
+        if user_id is None or role is None:
             raise HTTPException(
                 status_code=401, detail="Invalid authentication credentials."
             )
@@ -56,6 +56,7 @@ def get_current_user(
         if user is None:
             raise HTTPException(status_code=401, detail="User not found.")
 
+        user.role_id = role
         return user
     except JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials.")

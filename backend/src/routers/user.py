@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from services.security import admin_required
 from database.session import get_db
-from schemas.user import UserCreate, UserOut, Token
-from services.user import create_user, login_user, create_user_token, get_all_users
+from schemas.user import UserCreate, UserOut, Token, LoginRequest
+from services.user import create_user, login_user, get_all_users
 
 user_router = APIRouter()
 
@@ -15,11 +15,11 @@ def register_user(user_create: UserCreate, db: Session = Depends(get_db)):
 
 
 @user_router.post("/login", response_model=Token)
-def login(email: str, password: str, db: Session = Depends(get_db)):
-    db_user = login_user(db, email, password)
-    if not db_user:
+def login(login_request: LoginRequest, db: Session = Depends(get_db)):
+    token = login_user(db, login_request.email, login_request.password)
+    if not token:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    return create_user_token(db_user)
+    return token
 
 
 @user_router.get("/", dependencies=[Depends(admin_required)])

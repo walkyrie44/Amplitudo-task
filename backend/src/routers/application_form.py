@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.models import User
@@ -5,7 +6,7 @@ from services.security import get_current_user
 from schemas.application_form import JobApplicantCreate, JobApplicantRead
 from database.session import get_db
 from services.application_form import (
-    create_job_applicant,
+    create_or_update_job_applicant,
     get_job_applicants,
     get_job_applicant_by_id,
 )
@@ -13,13 +14,13 @@ from services.application_form import (
 appl_router = APIRouter()
 
 
-@appl_router.post("/", response_model=JobApplicantRead)
+@appl_router.put("/", response_model=JobApplicantRead)
 def create_job(
     job_applicant: JobApplicantCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return create_job_applicant(
+    return create_or_update_job_applicant(
         db=db, job_applicant=job_applicant, current_user=current_user
     )
 
@@ -39,15 +40,17 @@ def get_applicants(
     return get_job_applicants(db=db, skip=skip, limit=limit)
 
 
-@appl_router.get("/single-application", response_model=JobApplicantRead)
+@appl_router.get("/single-application", response_model=Optional[JobApplicantRead])
 def get_applicant_by_id(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     job_applicant_id = current_user.id
     db_job_applicant = get_job_applicant_by_id(db=db, job_applicant_id=job_applicant_id)
-    if db_job_applicant is None or db_job_applicant.user_id != current_user.id:
+    if db_job_applicant is None:
+        return None
+    if db_job_applicant.user_id != current_user.id:
         raise HTTPException(
-            status_code=404, detail="Job applicant not found or unauthorized"
+            status_code=403, detail="Job applicant not found or unauthorized"
         )
 
     return db_job_applicant
