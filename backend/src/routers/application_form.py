@@ -1,7 +1,8 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from database.models import User
+from sqlalchemy.orm import Session, joinedload
+from database.models import User, JobApplicant
+from fastapi.params import Query
 from services.security import get_current_user
 from schemas.application_form import JobApplicantCreate, JobApplicantRead
 from database.session import get_db
@@ -25,19 +26,36 @@ def create_job(
     )
 
 
-@appl_router.get("/", response_model=list[JobApplicantRead])
+@appl_router.get("/")
 def get_applicants(
-    skip: int = 0,
-    limit: int = 10,
+    page: int = Query(1, gt=0, description="Page number"),
+    limit: int = Query(10, gt=0, le=100, description="Number of items per page"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     if current_user.role_id != 1:
         raise HTTPException(
-            status_code=403, detail="You are not authorized to view all job applicants"
+            status_code=403, detail="You are not authorized to view job applicants"
         )
 
-    return get_job_applicants(db=db, skip=skip, limit=limit)
+    total_count = db.query(JobApplicant).count()
+    total_pages = (total_count + limit - 1) // limit
+
+    applicants = (
+        db.query(JobApplicant)
+        .options(joinedload(JobApplicant.user))
+        .offset((page - 1) * limit)
+        .limit(limit)
+        .all()
+    )
+
+    return {
+        "total_count": total_count,
+        "total_pages": total_pages,
+        "page": page,
+        "page_size": limit,
+        "items": applicants,
+    }
 
 
 @appl_router.get("/single-application", response_model=Optional[JobApplicantRead])

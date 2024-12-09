@@ -3,8 +3,8 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthContext";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegistrationFormPage";
-import DashboardPage from "../pages/ApplicationFormPage";
-import AdminPage from "../pages/AdminPage";
+import ApplicationForm from "../pages/ApplicationFormPage";
+import AdminPage from "../pages/AdminDashboardPage";
 import Header from "../components/Header";
 
 const Navigation = () => {
@@ -34,7 +34,7 @@ const Navigation = () => {
               userRole === 1 ? (
                 <AdminPage />
               ) : (
-                <DashboardPage />
+                <ApplicationForm />
               )
             ) : (
               <LoginPage />

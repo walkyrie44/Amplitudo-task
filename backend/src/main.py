@@ -17,3 +17,4 @@ app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
 app.include_router(user_router, prefix="/api/authenticate")
 app.include_router(appl_router, prefix="/api/application-form")
+    

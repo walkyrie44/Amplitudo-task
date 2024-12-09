@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import {
-  getApplciation,
+  getPersonalApplication,
   createOrUpdateForm,
 } from "../services/applicationForm";
 import AlertMessage from "../components/AlertMessage";
@@ -9,7 +9,7 @@ import countriesData from "../data/countries.json";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function ApplicationForm() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [schools, setSchools] = useState([]);
   const [cvFiles, setCvFiles] = useState([]);
@@ -50,7 +50,7 @@ export default function ApplicationForm() {
 
   const fetchData = async () => {
     try {
-      const data = await getApplciation();
+      const data = await getPersonalApplication();
       setLoading(true);
       const formDataFromAPI = data && typeof data === "object" ? data : {};
       setFormData({
@@ -121,6 +121,18 @@ export default function ApplicationForm() {
 
   const handleFileChange = (e, type) => {
     const files = Array.from(e.target.files);
+    const maxFileSize = 10 * 1024 * 1024;
+    const allowedImageFormats = ["jpg", "jpeg", "png"];
+    const allowedCVFormats = ["pdf", "docx"];
+
+    if (files.some((file) => file.size > maxFileSize)) {
+      setAlertData({
+        message: "One or more files exceed the size limit of 10 MB.",
+        alertType: "dismiss",
+      });
+      return;
+    }
+
     if (files.length > 0) {
       const newFiles = [...cvFiles];
       const reader = new FileReader();
@@ -129,6 +141,26 @@ export default function ApplicationForm() {
       const readNextFile = () => {
         if (fileIndex < files.length) {
           const file = files[fileIndex];
+          const fileExtension = file.name.split(".").pop().toLowerCase();
+
+          if (
+            type === "profile-photo" &&
+            !allowedImageFormats.includes(fileExtension)
+          ) {
+            setAlertData({
+              message:
+                "Only JPG, JPEG, and PNG formats are allowed for profile photos.",
+              alertType: "dismiss",
+            });
+            return;
+          }
+          if (type === "cv" && !allowedCVFormats.includes(fileExtension)) {
+            setAlertData({
+              message: "Only PDF and DOCX formats are allowed for CV files.",
+              alertType: "dismiss",
+            });
+            return;
+          }
           reader.onloadend = () => {
             const base64String = reader.result.split(",")[1];
 
@@ -310,7 +342,9 @@ export default function ApplicationForm() {
                   onChange={handleInputChange}
                   className="mt-2 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 px-4 py-3 text-sm"
                 >
-                  <option value="" disabled>Select gender</option>
+                  <option value="" disabled>
+                    Select gender
+                  </option>
                   <option>male</option>
                   <option>female</option>
                   <option>other</option>
@@ -363,7 +397,7 @@ export default function ApplicationForm() {
                       <p className="pl-1">or drag and drop</p>
                     </div>
                     <p className="text-xs text-gray-600">
-                      PNG, JPG, GIF up to 10MB
+                      PNG, JPG, JPEG up to 10MB
                     </p>
                   </div>
                 </div>
@@ -443,7 +477,7 @@ export default function ApplicationForm() {
                       <p className="pl-1">or drag and drop</p>
                     </div>
                     <p className="text-xs text-gray-600">
-                      PDF, DOCX, TXT up to 10MB
+                      PDF, DOCX up to 10MB
                     </p>
                   </div>
                 </div>
@@ -468,7 +502,7 @@ export default function ApplicationForm() {
                       className="text-indigo-600 hover:text-indigo-500"
                       target="_blank"
                     >
-                      Preview uploaded document
+                      Uploaded document
                     </a>
                   </li>
                 ))}

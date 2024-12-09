@@ -10,6 +10,16 @@ class GenderEnum(str, Enum):
     other = "other"
 
 
+class UserRead(BaseModel):
+    # id: int
+    full_name: Optional[str] = None 
+    email: str
+    photo: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+
 class JobApplicantCreate(BaseModel):
     full_name: str
     birth_date: date
@@ -35,6 +45,7 @@ class JobApplicantRead(BaseModel):
     cv_files: Optional[List[str]] = []
     profile_picture: Optional[str] = None
     user_id: int
+    user: Optional[UserRead]
 
     class Config:
         orm_mode = True

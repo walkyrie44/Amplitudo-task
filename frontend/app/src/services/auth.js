@@ -13,8 +13,10 @@ export const login = async (email, password) => {
 
 export const googleLogin = async (token) => {
   try {
-    const response = await httpClient.post("/authenticate/google-login", { token });
-    setToken(response.access_token)
+    const response = await httpClient.post("/authenticate/google-login", {
+      token,
+    });
+    setToken(response.access_token);
     return response;
   } catch (error) {
     throw error.response?.data || "Google login failed";
@@ -25,11 +27,26 @@ export const register = async (email, password, fullName, image = null) => {
   const data = {
     email,
     password,
-    full_name:fullName,
+    full_name: fullName,
     photo: image || null,
   };
 
   const response = await httpClient.post("/authenticate/register", data);
 
+  return response;
+};
+
+export const getUnfinishedUsers = async (page = 1, pageSize = 10) => {
+  const response = await httpClient.get("/authenticate", {
+    params: {
+      page,
+      limit: pageSize,
+    },
+  });
+  return response;
+};
+
+export const deleteUser = async (userId) => {
+  const response = await httpClient.delete(`/authenticate/${userId}/delete`);
   return response;
 };
