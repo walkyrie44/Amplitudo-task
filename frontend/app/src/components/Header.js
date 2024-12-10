@@ -23,9 +23,9 @@ export default function Header() {
 
   const navigation =
     userRole === 1
-      ? [{ name: "Dashboard", href: "#", current: true }]
+      ? [{ name: "Dashboard", current: true }]
       : userRole === 2
-      ? [{ name: "Application", href: "#", current: true }]
+      ? [{ name: "Application", current: true }]
       : [];
 
   const handleLogout = () => {
@@ -57,9 +57,10 @@ export default function Header() {
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
                 {navigation.map((item) => (
-                  <a
+                  <DisclosureButton
                     key={item.name}
-                    href={item.href}
+                    // href={item.href}
+                    as="button"
                     aria-current={item.current ? "page" : undefined}
                     className={classNames(
                       item.current
@@ -69,54 +70,48 @@ export default function Header() {
                     )}
                   >
                     {item.name}
-                  </a>
+                  </DisclosureButton>
                 ))}
               </div>
             </div>
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            <Menu as="div" className="relative ml-3">
-              <div>
-                <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">Open user menu</span>
-                  <img
-                    alt=""
-                    src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-                    className="size-8 rounded-full"
-                  />
-                </MenuButton>
-              </div>
-              <MenuItems
-                transition
-                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-              >
-                <MenuItem>
+            {userRole && (
+              <Menu as="div" className="relative ml-3">
+                <div>
+                  <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                    <span className="absolute -inset-1.5" />
+                    <span className="sr-only">Open user menu</span>
+                    <img
+                      alt=""
+                      src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                      className="size-8 rounded-full"
+                    />
+                  </MenuButton>
+                </div>
+                <MenuItems
+                  transition
+                  className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                  {/* <MenuItem>
                   <a
                     href="#"
                     className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
                   >
                     Your Profile
                   </a>
-                </MenuItem>
-                <MenuItem>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
-                  >
-                    Settings
-                  </a>
-                </MenuItem>
-                <MenuItem>
-                  <a
-                    onClick={handleLogout}
-                    className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
-                  >
-                    Sign out
-                  </a>
-                </MenuItem>
-              </MenuItems>
-            </Menu>
+                </MenuItem> */}
+                  <MenuItem>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none"
+                    >
+                      Sign out
+                    </button>
+                  </MenuItem>
+                </MenuItems>
+              </Menu>
+            )}
           </div>
         </div>
       </div>
@@ -126,7 +121,7 @@ export default function Header() {
           {navigation.map((item) => (
             <DisclosureButton
               key={item.name}
-              as="a"
+              as="button"
               href={item.href}
               aria-current={item.current ? "page" : undefined}
               className={classNames(

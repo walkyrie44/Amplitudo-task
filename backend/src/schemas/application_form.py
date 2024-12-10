@@ -12,7 +12,7 @@ class GenderEnum(str, Enum):
 
 class UserRead(BaseModel):
     # id: int
-    full_name: Optional[str] = None 
+    full_name: Optional[str] = None
     email: str
     photo: Optional[str] = None
 

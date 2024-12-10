@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { login, googleLogin } from "../services/auth";
 import { AuthContext } from "../components/AuthContext";
 import AlertMessage from "../components/AlertMessage";
@@ -17,6 +17,18 @@ export default function Login() {
 
   const { updateAuth } = useContext(AuthContext);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const message = queryParams.get('message');
+    if (message) {
+      setAlertData({
+        message: message,
+        alertType: "success",
+      });
+    }
+  }, [location]);
 
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -57,6 +69,12 @@ export default function Login() {
         message: "Unable to login, check your email and password.",
         alertType: "dismiss",
       });
+      if (err.status === 400) {
+        setAlertData({
+          message: err.response.data.detail,
+          alertType: "dismiss",
+        });
+      }
     }
   };
 

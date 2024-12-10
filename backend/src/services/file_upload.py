@@ -65,7 +65,9 @@ def save_documents(document_files: list[str]) -> list[str]:
                     Document(document_io)
                     file_extension = "docx"
                 except Exception:
-                    raise ValueError("Unsupported file format. Only PDF and DOCX are allowed.")
+                    raise ValueError(
+                        "Unsupported file format. Only PDF and DOCX are allowed."
+                    )
 
             filename = f"{uuid.uuid4()}.{file_extension}"
             file_path = os.path.join(save_directory, filename)

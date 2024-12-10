@@ -4,6 +4,7 @@ import {
   getPersonalApplication,
   createOrUpdateForm,
 } from "../services/applicationForm";
+import { getFullName } from "../services/users";
 import AlertMessage from "../components/AlertMessage";
 import countriesData from "../data/countries.json";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -54,7 +55,7 @@ export default function ApplicationForm() {
       setLoading(true);
       const formDataFromAPI = data && typeof data === "object" ? data : {};
       setFormData({
-        full_name: formDataFromAPI.full_name || "",
+        full_name: formDataFromAPI.full_name ? formDataFromAPI.full_name: await fetchFullName(),
         birth_date: formDataFromAPI.birth_date || "",
         country: formDataFromAPI.country || "",
         city: formDataFromAPI.city || "",
@@ -65,7 +66,7 @@ export default function ApplicationForm() {
       });
       checkFormCompletion(formDataFromAPI);
       setSelectedCountry(formDataFromAPI.country || "");
-    } catch (err) {
+    } catch {
       setAlertData({
         message: "An error occurred, try again later",
         alertType: "dismiss",
@@ -79,6 +80,19 @@ export default function ApplicationForm() {
     fetchData();
   }, []);
 
+  const fetchFullName = async () => {
+    try {
+      const response = await getFullName();
+      console.log(response)
+      return response;
+    } catch {
+      setAlertData({
+        message: "An error occurred, try again later",
+        alertType: "dismiss",
+      });
+    }
+  };
+
   const checkFormCompletion = (data) => {
     const isComplete = Object.values(data).some(
       (value) => value !== "" && value.length !== 0
@@ -91,6 +105,14 @@ export default function ApplicationForm() {
     setFormData({
       ...formData,
       [name]: value,
+    });
+
+    setFormErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      if (value && updatedErrors[name]) {
+        delete updatedErrors[name];
+      }
+      return updatedErrors;
     });
   };
 
@@ -133,6 +155,14 @@ export default function ApplicationForm() {
       return;
     }
 
+    if (type === "cv" && cvFiles.length + files.length > 3) {
+      setAlertData({
+        message: "You can upload a maximum of 3 CV files.",
+        alertType: "dismiss",
+      });
+      return;
+    }
+
     if (files.length > 0) {
       const newFiles = [...cvFiles];
       const reader = new FileReader();
@@ -167,10 +197,20 @@ export default function ApplicationForm() {
             if (type === "profile-photo") {
               setFormData({ ...formData, profile_picture: base64String });
               setPreviewImage(reader.result);
+              setFormErrors((prevErrors) => {
+                const updatedErrors = { ...prevErrors };
+                delete updatedErrors.profile_picture;
+                return updatedErrors;
+              });
             } else if (type === "cv") {
               newFiles.push(base64String);
               setCvFiles(newFiles);
               setFormData({ ...formData, cv_files: newFiles });
+              setFormErrors((prevErrors) => {
+                const updatedErrors = { ...prevErrors };
+                delete updatedErrors.cv_files;
+                return updatedErrors;
+              });
             }
             fileIndex++;
             readNextFile();
@@ -207,6 +247,21 @@ export default function ApplicationForm() {
     if (formData.cv_files.length === 0) {
       errors.cv_files = "At least one CV file is required";
     }
+
+    const today = new Date();
+    const birthDate = new Date(formData.birth_date);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    if (!formData.birth_date || age < 18) {
+      errors.birth_date = "You must be at least 18 years old.";
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -392,6 +447,7 @@ export default function ApplicationForm() {
                           type="file"
                           className="sr-only"
                           onChange={(e) => handleFileChange(e, "profile-photo")}
+                          accept=".jpg,.jpeg,.png"
                         />
                       </label>
                       <p className="pl-1">or drag and drop</p>
@@ -429,6 +485,9 @@ export default function ApplicationForm() {
                       onChange={handleInputChange}
                       className="mt-2 block w-full rounded-md border border-gray-300 shadow-sm focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 px-4 py-3 text-sm"
                     >
+                      <option value="" disabled>
+                        Select school
+                      </option>
                       {schools.map((school) => (
                         <option
                           key={school.name}
@@ -471,6 +530,7 @@ export default function ApplicationForm() {
                           type="file"
                           className="sr-only"
                           onChange={(e) => handleFileChange(e, "cv")}
+                          accept=".pdf,.docx"
                           multiple
                         />
                       </label>
@@ -501,6 +561,7 @@ export default function ApplicationForm() {
                       download={`cv-file-${index + 1}.pdf`}
                       className="text-indigo-600 hover:text-indigo-500"
                       target="_blank"
+                      rel="noreferrer"
                     >
                       Uploaded document
                     </a>

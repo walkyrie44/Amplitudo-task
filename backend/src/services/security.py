@@ -68,3 +68,16 @@ def admin_required(current_user: User = Depends(get_current_user)):
             status_code=403, detail="You do not have permission to perform this action."
         )
     return current_user
+
+
+def create_email_verification_token(email: str) -> str:
+    data = {"sub": email, "type": "email_verification"}
+    expires = timedelta(hours=24)
+    return create_access_token(data, expires)
+
+
+def verify_email_token(token: str) -> str:
+    payload = verify_token(token)
+    if not payload or payload.get("type") != "email_verification":
+        raise HTTPException(status_code=400, detail="Invalid or expired token.")
+    return payload.get("sub")

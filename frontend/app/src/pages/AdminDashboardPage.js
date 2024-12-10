@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { getApplicationAndUserData } from "../services/applicationForm";
-import { getUnfinishedUsers, deleteUser } from "../services/auth";
+import { getUnfinishedUsers, deleteUser } from "../services/users";
 import UserDetails from "../components/UserDetails";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import LoadingSpinner from "../components/LoadingSpinner";
 import AlertMessage from "../components/AlertMessage";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import AddUserByAdmin from "../components/AddUserByAdmin";
+
 
 const AdminDashboard = () => {
   const [applicationForm, setApplicationForm] = useState([]);
@@ -14,12 +16,11 @@ const AdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [alertData, setAlertData] = useState({});
-  //   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -29,14 +30,27 @@ const AdminDashboard = () => {
     city: "",
     education: "",
   });
+  const [debouncedSearchParams, setDebouncedSearchParams] = useState(searchParams);
+
+  const pageSize = 2;
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchParams(searchParams);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [searchParams]);
 
   useEffect(() => {
     if (!showUsersOnly) {
-      applicationFormData(page, pageSize, searchParams);
+      applicationFormData(page, pageSize, debouncedSearchParams);
     } else {
-      fetchUnfinishedUsers(page, pageSize, searchParams.full_name);
+      fetchUnfinishedUsers(page, pageSize, debouncedSearchParams.full_name);
     }
-  }, [page, pageSize, showUsersOnly, searchParams]);
+  }, [page, pageSize, showUsersOnly, debouncedSearchParams]);
 
   const handleSearchChange = (e) => {
     setSearchParams({ ...searchParams, [e.target.name]: e.target.value });
@@ -132,6 +146,9 @@ const AdminDashboard = () => {
         onClose={handleClose}
       />
       <LoadingSpinner loading={loading} />
+      {isAddFormOpen && (
+        <AddUserByAdmin isOpen={isAddFormOpen} onClose={() => setIsAddFormOpen(false)} />
+      )}
       <div className="px-4 sm:px-6 lg:px-8 mt-4 mb-8">
         <div className="sm:flex sm:items-center justify-between">
           <div className="sm:flex-auto">
@@ -162,7 +179,7 @@ const AdminDashboard = () => {
               </span>
             </label>
             <button
-              // onClick={() => setIsAddFormOpen(true)}
+              onClick={() => setIsAddFormOpen(true)}
               className="block rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-600"
             >
               Add User
@@ -195,16 +212,6 @@ const AdminDashboard = () => {
               placeholder="Search by school"
               className="border px-4 py-2 rounded-md w-full"
             />
-            <button
-              onClick={() => {
-                setPage(1);
-
-                applicationFormData(1, pageSize, searchParams);
-              }}
-              className="block rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-600"
-            >
-              Search
-            </button>
           </div>
         ) : (
           <div className="mt-4 flex gap-4 justify-end">
@@ -216,15 +223,6 @@ const AdminDashboard = () => {
               placeholder="Search by name"
               className="border px-4 py-2 rounded-md w-64"
             />
-            <button
-              onClick={() => {
-                setPage(1);
-                fetchUnfinishedUsers(1, pageSize, searchParams.full_name);
-              }}
-              className="block rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-600"
-            >
-              Search
-            </button>
           </div>
         )}
 
@@ -338,7 +336,7 @@ const AdminDashboard = () => {
                               >
                                 <img
                                   src={`${process.env.REACT_APP_API_URL}/${user.profile_picture}`}
-                                  alt="Application Photo"
+                                  alt={`Profile of ${user.full_name}`}
                                   className="h-10 w-10 rounded-full object-cover"
                                 />
                               </a>
@@ -408,7 +406,7 @@ const AdminDashboard = () => {
                             {user.photo ? (
                               <img
                                 src={`${process.env.REACT_APP_API_URL}/${user.photo}`}
-                                alt="User Profile"
+                                alt={`Profile of ${user.full_name}`}
                                 className="h-10 w-10 rounded-full object-cover"
                               />
                             ) : (
@@ -416,12 +414,6 @@ const AdminDashboard = () => {
                             )}
                           </td>
                           <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            {/* <button
-                            className="text-indigo-600 hover:text-indigo-900"
-                            onClick={() => handleViewUser(user)}
-                          >
-                            View User
-                          </button> */}
                             <button
                               onClick={() => handleOpenDeleteModal(user)}
                               className="ml-4 text-red-600 hover:text-red-900"

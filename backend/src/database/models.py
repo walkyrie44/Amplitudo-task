@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from database.db import Base
 from sqlalchemy.dialects.postgresql import JSON
@@ -20,6 +20,7 @@ class User(Base):
     password = Column(String)
     full_name = Column(String, nullable=True)
     photo = Column(String, nullable=True)
+    is_verified = Column(Boolean, default=False)
     role_id = Column(Integer, ForeignKey("roles.id"))
     role = relationship("Role", back_populates="users")
     job_applicant = relationship("JobApplicant", back_populates="user", uselist=False)

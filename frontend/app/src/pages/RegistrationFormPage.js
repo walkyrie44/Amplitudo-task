@@ -63,7 +63,9 @@ export default function Register() {
 
     try {
       await register(email, password, fullName, base64Image);
-      navigate("/login");
+      navigate(
+        "/login?message=Please check your email to verify your account."
+      );
     } catch (err) {
       setAlertData({
         message: "An error occurred during registration. Try again",

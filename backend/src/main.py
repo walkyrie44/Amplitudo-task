@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from routers.user import user_router
+from routers.authentication import authentication_router
+from routers.users import users_router
 from routers.application_form import appl_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -15,6 +16,6 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 
-app.include_router(user_router, prefix="/api/authenticate")
+app.include_router(authentication_router, prefix="/api/authenticate")
 app.include_router(appl_router, prefix="/api/application-form")
-    
+app.include_router(users_router, prefix="/api/users")

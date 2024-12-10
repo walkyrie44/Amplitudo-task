@@ -8,7 +8,6 @@ from schemas.application_form import JobApplicantCreate, JobApplicantRead
 from database.session import get_db
 from services.application_form import (
     create_or_update_job_applicant,
-    get_job_applicants,
     get_job_applicant_by_id,
 )
 
@@ -52,11 +51,7 @@ def get_applicants(
 
     total_count = query.count()
 
-    applicants = (
-        query.offset((page - 1) * limit)
-        .limit(limit)
-        .all()
-    )
+    applicants = query.offset((page - 1) * limit).limit(limit).all()
 
     total_pages = (total_count + limit - 1) // limit
 

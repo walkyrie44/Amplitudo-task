@@ -11,23 +11,10 @@ class UserCreate(BaseModel):
 
 
 class UserOut(BaseModel):
+    id: int
     full_name: Optional[str] = None
     email: str
     photo: Optional[str] = None
 
     class Config:
         orm_mode = True
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-class GoogleLoginRequest(BaseModel):
-    token: str

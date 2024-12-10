@@ -1,6 +1,7 @@
 import { setToken } from "./token";
 import httpClient from "./client";
 
+
 export const login = async (email, password) => {
   const response = await httpClient.post("/authenticate/login", {
     email,
@@ -30,24 +31,29 @@ export const register = async (email, password, fullName, image = null) => {
     full_name: fullName,
     photo: image || null,
   };
-
   const response = await httpClient.post("/authenticate/register", data);
 
   return response;
 };
 
-export const getUnfinishedUsers = async (page = 1, pageSize = 10, full_name) => {
-  const response = await httpClient.get("/authenticate", {
-    params: {
-      page,
-      limit: pageSize,
-      full_name,
-    },
-  });
+export const registerUserByAdmin = async (
+  email,
+  password,
+  fullName,
+  image = null
+) => {
+  const data = {
+    email,
+    password,
+    full_name: fullName,
+    photo: image || null,
+  };
+  const response = await httpClient.post(
+    "/authenticate/admin/create-user",
+    data
+  );
+
   return response;
 };
 
-export const deleteUser = async (userId) => {
-  const response = await httpClient.delete(`/authenticate/${userId}/delete`);
-  return response;
-};
+

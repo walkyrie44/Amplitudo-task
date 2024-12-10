@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 const AlertMessage = ({ message, alertType, onClose }) => {
-  const [timeoutId, setTimeoutId] = useState(null);
 
-  const alertTypeClass = alertType === "success"
-    ? "bg-green-100 text-green-800"
-    : "bg-red-100 text-red-800";
+  const alertTypeClass =
+    alertType === "success"
+      ? "bg-green-100 text-green-800"
+      : "bg-red-100 text-red-800";
 
   useEffect(() => {
     if (alertType) {
       const id = setTimeout(() => {
         if (onClose) onClose();
       }, 5000);
-      setTimeoutId(id);
+      return () => clearTimeout(id);
     }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
   }, [alertType, onClose]);
 
   if (!message) return null;
@@ -51,7 +47,11 @@ const AlertMessage = ({ message, alertType, onClose }) => {
                 className="text-gray-400 hover:text-gray-600 focus:outline-none"
                 aria-label="Close"
               >
-                <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="h-8 w-8"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"
