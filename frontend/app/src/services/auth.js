@@ -36,11 +36,12 @@ export const register = async (email, password, fullName, image = null) => {
   return response;
 };
 
-export const getUnfinishedUsers = async (page = 1, pageSize = 10) => {
+export const getUnfinishedUsers = async (page = 1, pageSize = 10, full_name) => {
   const response = await httpClient.get("/authenticate", {
     params: {
       page,
       limit: pageSize,
+      full_name,
     },
   });
   return response;

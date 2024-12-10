@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
 from sqlalchemy.orm import Session
+from typing import Optional
 from services.security import admin_required
 from database.session import get_db
 from schemas.user import UserCreate, UserOut, Token, LoginRequest, GoogleLoginRequest
@@ -63,8 +64,8 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
 
 @user_router.get("/", dependencies=[Depends(admin_required)])
 def get_unfinished_users(page: int = Query(1, gt=0, description="Page number"),
-    limit: int = Query(10, gt=0, le=100, description="Number of items per page"), db: Session = Depends(get_db)):
-    users = get_all_unfinished_users(db, page, limit)
+    limit: int = Query(10, gt=0, le=100, description="Number of items per page"), full_name: Optional[str] = Query(None, description="Filter by full name"), db: Session = Depends(get_db)):
+    users = get_all_unfinished_users(db, page, limit, full_name)
     if not users:
         raise HTTPException(status_code=404, detail="No users found")
     return users

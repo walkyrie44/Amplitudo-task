@@ -19,6 +19,11 @@ export default function Register() {
 
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return regex.test(email);
+  };
+
   const validateForm = () => {
     let isValid = true;
 
@@ -32,6 +37,9 @@ export default function Register() {
     }
     if (!password) {
       setPasswordError("Password is required.");
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError("Please enter a valid email address.");
       isValid = false;
     }
     if (!repeatPassword) {
@@ -109,7 +117,6 @@ export default function Register() {
                 <input
                   id="email"
                   name="email"
-                  type="email"
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

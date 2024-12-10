@@ -10,11 +10,12 @@ export const createOrUpdateForm = async (formData) => {
   return response;
 };
 
-export const getApplicationAndUserData = async (page = 1, pageSize = 10) => {
+export const getApplicationAndUserData = async (page = 1, pageSize = 10, filters = {}) => {
   const response = await httpClient.get("/application-form/", {
     params: {
       page,
       limit: pageSize,
+      ...filters,
     },
   });
   return response;

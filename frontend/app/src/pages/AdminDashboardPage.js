@@ -24,13 +24,23 @@ const AdminDashboard = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
 
+  const [searchParams, setSearchParams] = useState({
+    full_name: "",
+    city: "",
+    education: "",
+  });
+
   useEffect(() => {
     if (!showUsersOnly) {
-      applicationFormData(page, pageSize);
+      applicationFormData(page, pageSize, searchParams);
     } else {
-      fetchUnfinishedUsers(page, pageSize);
+      fetchUnfinishedUsers(page, pageSize, searchParams.full_name);
     }
-  }, [page, pageSize, showUsersOnly]);
+  }, [page, pageSize, showUsersOnly, searchParams]);
+
+  const handleSearchChange = (e) => {
+    setSearchParams({ ...searchParams, [e.target.name]: e.target.value });
+  };
 
   const handleViewUser = (user) => {
     setSelectedUser(user);
@@ -40,9 +50,9 @@ const AdminDashboard = () => {
     setSelectedUser(null);
   };
 
-  const applicationFormData = async (page, pageSize) => {
+  const applicationFormData = async (page, pageSize, filters) => {
     try {
-      const response = await getApplicationAndUserData(page, pageSize);
+      const response = await getApplicationAndUserData(page, pageSize, filters);
       setLoading(true);
       setApplicationForm(response.items);
       setTotalCount(response.total_count);
@@ -57,10 +67,10 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchUnfinishedUsers = async (page, pageSize) => {
+  const fetchUnfinishedUsers = async (page, pageSize, filters) => {
     try {
       setLoading(true);
-      const response = await getUnfinishedUsers(page, pageSize);
+      const response = await getUnfinishedUsers(page, pageSize, filters);
       setUnfinishedUsers(response.items);
       setTotalCount(response.total_count);
       setTotalPages(response.total_pages);
@@ -93,7 +103,10 @@ const AdminDashboard = () => {
         applicationFormData(page, pageSize);
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      setAlertData({
+        message: "Problem with deleting user, try again later.",
+        alertType: "dismiss",
+      });
     }
   };
 
@@ -123,10 +136,10 @@ const AdminDashboard = () => {
         <div className="sm:flex sm:items-center justify-between">
           <div className="sm:flex-auto">
             <h1 className="text-base font-semibold leading-6 text-gray-900">
-              Members
+              Users
             </h1>
             <p className="mt-2 text-sm text-gray-700">
-              A list of all the members.
+              List of all applicants.
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -152,10 +165,69 @@ const AdminDashboard = () => {
               // onClick={() => setIsAddFormOpen(true)}
               className="block rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-600"
             >
-              Add Members
+              Add User
             </button>
           </div>
         </div>
+        {!showUsersOnly ? (
+          <div className="mt-4 flex gap-4">
+            <input
+              type="text"
+              name="full_name"
+              value={searchParams.full_name}
+              onChange={handleSearchChange}
+              placeholder="Search by name"
+              className="border px-4 py-2 rounded-md w-full"
+            />
+            <input
+              type="text"
+              name="city"
+              value={searchParams.city}
+              onChange={handleSearchChange}
+              placeholder="Search by city"
+              className="border px-4 py-2 rounded-md w-full"
+            />
+            <input
+              type="text"
+              name="education"
+              value={searchParams.education}
+              onChange={handleSearchChange}
+              placeholder="Search by school"
+              className="border px-4 py-2 rounded-md w-full"
+            />
+            <button
+              onClick={() => {
+                setPage(1);
+
+                applicationFormData(1, pageSize, searchParams);
+              }}
+              className="block rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-600"
+            >
+              Search
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex gap-4 justify-end">
+            <input
+              type="text"
+              name="full_name"
+              value={searchParams.full_name}
+              onChange={handleSearchChange}
+              placeholder="Search by name"
+              className="border px-4 py-2 rounded-md w-64"
+            />
+            <button
+              onClick={() => {
+                setPage(1);
+                fetchUnfinishedUsers(1, pageSize, searchParams.full_name);
+              }}
+              className="block rounded-md bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:ring-2 focus-visible:ring-indigo-600"
+            >
+              Search
+            </button>
+          </div>
+        )}
+
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -193,6 +265,12 @@ const AdminDashboard = () => {
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
                           CV Files
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Education
                         </th>
                         <th
                           scope="col"
@@ -244,6 +322,9 @@ const AdminDashboard = () => {
                                   </a>
                                 ))
                               : "No CV Files"}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {user.education || "N/A"}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {user.gender || "N/A"}

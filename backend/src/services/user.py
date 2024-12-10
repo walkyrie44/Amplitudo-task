@@ -37,24 +37,19 @@ def create_user_token(user: User):
     access_token = create_access_token(data={"sub": user.email, "role": user.role_id})
     return Token(access_token=access_token, token_type="bearer")
 
-def get_all_unfinished_users(db: Session, page, limit):
-    total_count = db.query(User).filter(
+def get_all_unfinished_users(db: Session, page, limit, full_name):
+    query = db.query(User).filter(
         User.role_id == 2,
         User.id.notin_(db.query(JobApplicant.user_id))
-    ).count()
+    )
 
+    if full_name:
+        query = query.filter(User.full_name.ilike(f"%{full_name}%"))
+
+    total_count = query.count()
     total_pages = (total_count + limit - 1) // limit
 
-    unfinished_users = (
-        db.query(User)
-        .filter(
-            User.role_id == 2,
-            User.id.notin_(db.query(JobApplicant.user_id))
-        )
-        .offset((page - 1) * limit)
-        .limit(limit)
-        .all()
-    )
+    unfinished_users = query.offset((page - 1) * limit).limit(limit).all()
 
     return {
         "total_count": total_count,
