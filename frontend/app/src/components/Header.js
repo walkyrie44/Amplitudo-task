@@ -8,9 +8,10 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../components/AuthContext";
+import { getUserProfile } from "../services/users";
 import logo from "../assets/images/logo.png";
 
 function classNames(...classes) {
@@ -18,20 +19,37 @@ function classNames(...classes) {
 }
 
 export default function Header() {
+  const [photo, setPhoto] = useState();
   const navigate = useNavigate();
   const { logout, userRole } = useContext(AuthContext);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    if (userRole) {
+      getUserPhoto();
+    }
+  }, [userRole]);
+
   const navigation =
     userRole === 1
-      ? [{ name: "Dashboard", current: true }]
+      ? [{ name: "Dashboard", href: "/dashboard" }]
       : userRole === 2
-      ? [{ name: "Application", current: true }]
+      ? [{ name: "Application", href: "/application" }]
       : [];
+
+  const getUserPhoto = async () => {
+    try {
+      const response = await getUserProfile();
+      setPhoto(response.photo);
+    } catch {}
+  };
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 h-[7vh]">
@@ -59,11 +77,13 @@ export default function Header() {
                 {navigation.map((item) => (
                   <DisclosureButton
                     key={item.name}
-                    // href={item.href}
+                    onClick={() => navigate(item.href)}
                     as="button"
-                    aria-current={item.current ? "page" : undefined}
+                    aria-current={
+                      location.pathname === item.href ? "page" : undefined
+                    }
                     className={classNames(
-                      item.current
+                      location.pathname === item.href
                         ? "bg-gray-900 text-white"
                         : "text-gray-300 hover:bg-gray-700 hover:text-white",
                       "rounded-md px-3 py-2 text-sm font-medium"
@@ -84,7 +104,11 @@ export default function Header() {
                     <span className="sr-only">Open user menu</span>
                     <img
                       alt=""
-                      src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                      src={
+                        photo && process.env.REACT_APP_API_URL
+                          ? `${process.env.REACT_APP_API_URL}/${photo}`
+                          : "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                      }
                       className="size-8 rounded-full"
                     />
                   </MenuButton>
@@ -93,14 +117,16 @@ export default function Header() {
                   transition
                   className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                 >
-                  {/* <MenuItem>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
-                  >
-                    Your Profile
-                  </a>
-                </MenuItem> */}
+                  {userRole === 2 && (
+                    <MenuItem>
+                      <button
+                        onClick={() => navigate("/profile")}
+                        className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
+                      >
+                        Your Profile
+                      </button>
+                    </MenuItem>
+                  )}
                   <MenuItem>
                     <button
                       onClick={handleLogout}
@@ -121,11 +147,12 @@ export default function Header() {
           {navigation.map((item) => (
             <DisclosureButton
               key={item.name}
-              as="button"
-              href={item.href}
-              aria-current={item.current ? "page" : undefined}
+              onClick={() => navigate(item.href)}
+              aria-current={
+                location.pathname === item.href ? "page" : undefined
+              }
               className={classNames(
-                item.current
+                location.pathname === item.href
                   ? "bg-gray-900 text-white"
                   : "text-gray-300 hover:bg-gray-700 hover:text-white",
                 "block rounded-md px-3 py-2 text-base font-medium"

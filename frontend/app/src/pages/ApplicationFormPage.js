@@ -4,7 +4,7 @@ import {
   getPersonalApplication,
   createOrUpdateForm,
 } from "../services/applicationForm";
-import { getFullName } from "../services/users";
+import { getUserProfile } from "../services/users";
 import AlertMessage from "../components/AlertMessage";
 import countriesData from "../data/countries.json";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -46,45 +46,52 @@ export default function ApplicationForm() {
   }, [selectedCountry]);
 
   const handleCountryChange = (e) => {
-    setSelectedCountry(e.target.value);
-  };
-
-  const fetchData = async () => {
-    try {
-      const data = await getPersonalApplication();
-      setLoading(true);
-      const formDataFromAPI = data && typeof data === "object" ? data : {};
-      setFormData({
-        full_name: formDataFromAPI.full_name ? formDataFromAPI.full_name: await fetchFullName(),
-        birth_date: formDataFromAPI.birth_date || "",
-        country: formDataFromAPI.country || "",
-        city: formDataFromAPI.city || "",
-        gender: formDataFromAPI.gender || "",
-        education: formDataFromAPI.education || "",
-        profile_picture: formDataFromAPI.profile_picture || "",
-        cv_files: formDataFromAPI.cv_files || [],
-      });
-      checkFormCompletion(formDataFromAPI);
-      setSelectedCountry(formDataFromAPI.country || "");
-    } catch {
-      setAlertData({
-        message: "An error occurred, try again later",
-        alertType: "dismiss",
-      });
-    } finally {
-      setLoading(false);
-    }
+    const selectedCountry = e.target.value;
+    setSelectedCountry(selectedCountry);
+    
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      education: "",
+    }));
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getPersonalApplication();
+        setLoading(true);
+        const formDataFromAPI = data && typeof data === "object" ? data : {};
+        setFormData({
+          full_name: formDataFromAPI.full_name
+            ? formDataFromAPI.full_name
+            : await fetchFullName(),
+          birth_date: formDataFromAPI.birth_date || "",
+          country: formDataFromAPI.country || "",
+          city: formDataFromAPI.city || "",
+          gender: formDataFromAPI.gender || "",
+          education: formDataFromAPI.education || "",
+          profile_picture: formDataFromAPI.profile_picture || "",
+          cv_files: formDataFromAPI.cv_files || [],
+        });
+        checkFormCompletion(formDataFromAPI);
+        setSelectedCountry(formDataFromAPI.country || "");
+      } catch {
+        setAlertData({
+          message: "An error occurred, try again later",
+          alertType: "dismiss",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     fetchData();
   }, []);
-
+  
   const fetchFullName = async () => {
     try {
-      const response = await getFullName();
-      console.log(response)
-      return response;
+      const response = await getUserProfile();
+      return response.full_name;
     } catch {
       setAlertData({
         message: "An error occurred, try again later",
@@ -123,7 +130,6 @@ export default function ApplicationForm() {
     }
     try {
       await createOrUpdateForm(formData);
-      fetchData();
       setIsLocked(false);
       setAlertData({
         message: "Form submited succesfully",
@@ -215,11 +221,9 @@ export default function ApplicationForm() {
             fileIndex++;
             readNextFile();
           };
-
           reader.readAsDataURL(file);
         }
       };
-
       readNextFile();
     }
   };
@@ -250,7 +254,7 @@ export default function ApplicationForm() {
 
     const today = new Date();
     const birthDate = new Date(formData.birth_date);
-    const age = today.getFullYear() - birthDate.getFullYear();
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     if (
       monthDiff < 0 ||
@@ -264,6 +268,18 @@ export default function ApplicationForm() {
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const handleFileDelete = (index) => {
+    const updatedFiles = [...formData.cv_files];
+    updatedFiles.splice(index, 1);
+
+    setFormData({
+      ...formData,
+      cv_files: updatedFiles,
+    });
+
+    setCvFiles(updatedFiles);
   };
 
   return (
@@ -555,16 +571,25 @@ export default function ApplicationForm() {
               <ul className="mt-2 space-y-1 text-sm text-gray-600">
                 {(formData?.cv_files).map((file, index) => (
                   <li key={index} className="flex items-center">
-                    <span className="mr-2">File {index + 1}</span>
-                    <a
-                      href={`${process.env.REACT_APP_API_URL}/${file}`}
-                      download={`cv-file-${index + 1}.pdf`}
-                      className="text-indigo-600 hover:text-indigo-500"
-                      target="_blank"
-                      rel="noreferrer"
+                    <div className="flex items-center">
+                      <span className="mr-2">File {index + 1}</span>
+                      <a
+                        href={`${process.env.REACT_APP_API_URL}/${file}`}
+                        download={`cv-file-${index + 1}.pdf`}
+                        className="text-indigo-600 hover:text-indigo-500"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Uploaded document
+                      </a>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleFileDelete(index)}
+                      className="ml-2 text-sm text-red-600 hover:text-red-500"
                     >
-                      Uploaded document
-                    </a>
+                      Delete
+                    </button>
                   </li>
                 ))}
               </ul>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useContext } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { login, googleLogin } from "../services/auth";
 import { AuthContext } from "../components/AuthContext";
 import AlertMessage from "../components/AlertMessage";
@@ -18,6 +18,7 @@ export default function Login() {
   const { updateAuth } = useContext(AuthContext);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -64,6 +65,7 @@ export default function Login() {
     try {
       await login(email, password);
       updateAuth();
+      navigate("/");
     } catch (err) {
       setAlertData({
         message: "Unable to login, check your email and password.",

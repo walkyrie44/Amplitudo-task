@@ -1,10 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { AuthContext } from "../components/AuthContext";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegistrationFormPage";
 import ApplicationForm from "../pages/ApplicationFormPage";
 import AdminPage from "../pages/AdminDashboardPage";
+import UserProfile from "../pages/UserProfile";
 import Header from "../components/Header";
 
 const Navigation = () => {
@@ -12,8 +13,8 @@ const Navigation = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
+    if (!isAuthenticated) {
+      navigate("/login");
     }
   }, [isAuthenticated, navigate]);
 
@@ -25,8 +26,14 @@ const Navigation = () => {
     <>
       <Header />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/login"
+          element={isAuthenticated ? <ApplicationForm /> : <LoginPage />}
+        />
+        <Route
+          path="/register"
+          element={isAuthenticated ? <ApplicationForm /> : <RegisterPage />}
+        />
         <Route
           path="/"
           element={
@@ -41,6 +48,11 @@ const Navigation = () => {
             )
           }
         />
+        <Route
+          path="/profile"
+          element={userRole === 2 ? <UserProfile /> : <Navigate to="/" />}
+        />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>
   );

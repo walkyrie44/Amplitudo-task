@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from database.models import User, JobApplicant
 from fastapi import status
+from passlib.hash import bcrypt
+from services.file_upload import save_image
 
 
 def get_all_unfinished_users(db: Session, page, limit, full_name):
@@ -36,3 +38,20 @@ def delete_user(db: Session, user_id: int):
     db.commit()
 
     return status.HTTP_204_NO_CONTENT
+
+
+def update_user_data(db, current_user, payload):
+    user = db.query(User).filter(User.id == current_user.id).first()
+
+    if payload.full_name:
+        user.full_name = payload.full_name
+
+    if payload.password:
+        user.password = bcrypt.hash(payload.password)
+
+    if payload.photo:
+        user.photo = save_image(payload.photo)
+
+    db.commit()
+
+    return user

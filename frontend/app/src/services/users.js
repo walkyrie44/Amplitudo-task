@@ -21,7 +21,12 @@ export const getUnfinishedUsers = async (
     return response;
   };
 
-  export const getFullName = async () => {
-    const response = await httpClient.get("/users/name");
+  export const updateUserProfile = async (formData) => {
+    const response = await httpClient.put("/users/update-user", formData);
+    return response;
+  }
+
+  export const getUserProfile = async () => {
+    const response = await httpClient.get("/users/user");
     return response;
   }

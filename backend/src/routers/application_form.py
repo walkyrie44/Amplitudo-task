@@ -77,4 +77,4 @@ def get_applicant_by_id(
             status_code=403, detail="Job applicant not found or unauthorized"
         )
 
-    return db_job_applicant
+    return JobApplicantRead.from_orm(db_job_applicant)

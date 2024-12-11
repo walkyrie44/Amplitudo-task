@@ -11,10 +11,21 @@ class UserCreate(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: int
+    id: Optional[int] = None
     full_name: Optional[str] = None
-    email: str
+    email: Optional[str] = None
     photo: Optional[str] = None
 
     class Config:
         orm_mode = True
+
+
+class UserNameAndPhoto(BaseModel):
+    full_name: Optional[str] = None
+    photo: Optional[str] = None
+
+
+class UpdateUser(BaseModel):
+    full_name: Optional[str] = None
+    photo: Optional[str] = None
+    password: Optional[str] = None

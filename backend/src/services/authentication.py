@@ -84,4 +84,5 @@ def get_or_create_google_user(db: Session, email: str, full_name: str):
         db.add(user)
         db.commit()
         db.refresh(user)
+
     return user

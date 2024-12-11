@@ -6,6 +6,10 @@ from database.models import JobApplicant
 from schemas.application_form import JobApplicantCreate, JobApplicantRead
 
 
+def document_exist(string: str) -> bool:
+    return string.startswith("static/uploads/documents/")
+
+
 def create_or_update_job_applicant(
     db: Session, job_applicant: JobApplicantCreate, current_user: User
 ):
@@ -25,8 +29,25 @@ def create_or_update_job_applicant(
             db_job_applicant.profile_picture = save_image(job_applicant.profile_picture)
 
         if job_applicant.cv_files:
-            db_job_applicant.cv_files = save_documents(job_applicant.cv_files)
+            existing_files = set(db_job_applicant.cv_files or [])
 
+            incoming_files = set()
+            for cv_file in job_applicant.cv_files:
+                if document_exist(cv_file):
+                    incoming_files.add(cv_file)
+                else:
+                    saved_file = save_documents([cv_file])
+                    incoming_files.update(saved_file)
+
+            files_to_remove = existing_files - incoming_files
+
+            db_job_applicant.cv_files = [
+                f for f in db_job_applicant.cv_files if f not in files_to_remove
+            ]
+
+            db_job_applicant.cv_files.extend(incoming_files - existing_files)
+
+        db.flush()
         db.commit()
         db.refresh(db_job_applicant)
         return JobApplicantRead.from_orm(db_job_applicant)
@@ -38,8 +59,8 @@ def create_or_update_job_applicant(
         country=job_applicant.country,
         gender=job_applicant.gender,
         education=job_applicant.education,
-        cv_files=save_documents(job_applicant.cv_files),
         profile_picture=save_image(job_applicant.profile_picture),
+        cv_files=save_documents(job_applicant.cv_files),
         user_id=current_user.id,
     )
 

@@ -32,7 +32,7 @@ const AdminDashboard = () => {
   });
   const [debouncedSearchParams, setDebouncedSearchParams] = useState(searchParams);
 
-  const pageSize = 2;
+  const pageSize = 5;
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
