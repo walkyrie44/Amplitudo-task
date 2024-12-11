@@ -352,7 +352,7 @@ const AdminDashboard = () => {
                               View User
                             </button>
                             <button
-                              onClick={() => handleOpenDeleteModal(user)}
+                              onClick={() => handleOpenDeleteModal(user.user)}
                               className="ml-4 text-red-600 hover:text-red-900 cursor-pointer"
                             >
                               Delete

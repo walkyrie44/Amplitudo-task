@@ -13,7 +13,8 @@ const Navigation = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    const publicPaths = ["/login", "/register"];
+    if (!isAuthenticated && !publicPaths.includes(window.location.pathname)) {
       navigate("/login");
     }
   }, [isAuthenticated, navigate]);
@@ -32,7 +33,7 @@ const Navigation = () => {
         />
         <Route
           path="/register"
-          element={isAuthenticated ? <ApplicationForm /> : <RegisterPage />}
+          element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />}
         />
         <Route
           path="/"

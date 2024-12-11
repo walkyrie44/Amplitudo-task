@@ -42,6 +42,10 @@ export default function Register() {
       setEmailError("Please enter a valid email address.");
       isValid = false;
     }
+    if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      isValid = false;
+    }
     if (!repeatPassword) {
       setRepeatPasswordError("Please repeat your password.");
       isValid = false;
